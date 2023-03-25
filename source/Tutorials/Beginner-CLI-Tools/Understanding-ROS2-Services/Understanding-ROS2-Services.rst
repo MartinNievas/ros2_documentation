@@ -4,53 +4,53 @@
 
 .. _ROS2Services:
 
-Understanding services
-======================
+Comprender los servicios
+========================
 
-**Goal:** Learn about services in ROS 2 using command line tools.
+**Objetivo:** Aprender sobre los servicios en ROS 2 utilizando herramientas de línea de comandos.
 
-**Tutorial level:** Beginner
+**Nivel del Tutorial:** Principiante
 
-**Time:** 10 minutes
+**Tiempo:** 10 minutos
 
-.. contents:: Contents
+.. contents:: Contenido
    :depth: 2
    :local:
 
-Background
-----------
+Historial
+---------
 
-Services are another method of communication for nodes in the ROS graph.
-Services are based on a call-and-response model, versus topics’ publisher-subscriber model.
-While topics allow nodes to subscribe to data streams and get continual updates, services only provide data when they are specifically called by a client.
+Los servicios son otro método de comunicación para nodos en el grafo ROS.
+Los servicios se basan en un modelo de llamada y respuesta, a diferencia del modelo publicador-suscriptor de los topic.
+Si bien los topic permiten que los nodos se suscriban al flujo de datos y obtengan actualizaciones continuas, los servicios solo proporcionan datos cuando un cliente les llama específicamente.
 
 .. image:: images/Service-SingleServiceClient.gif
 
 .. image:: images/Service-MultipleServiceClient.gif
 
-Prerequisites
--------------
+Requisitos previos
+------------------
 
-Some concepts mentioned in this tutorial, like :doc:`Nodes <../Understanding-ROS2-Nodes/Understanding-ROS2-Nodes>` and :doc:`Topics <../Understanding-ROS2-Topics/Understanding-ROS2-Topics>`, were covered in previous tutorials in the series.
+Algunos conceptos son mencionados en este tutorial como :doc:`Nodes <../Understanding-ROS2-Nodes/Understanding-ROS2-Nodes>` y :doc:`Topics <../Understanding-ROS2-Topics/Understanding-ROS2-Topics>`, fueron cubiertos en tutoriales anteriores.
 
-You will need the :doc:`turtlesim package <../Introducing-Turtlesim/Introducing-Turtlesim>`.
+Requieres tener el :doc:`turtlesim package <../Introducing-Turtlesim/Introducing-Turtlesim>`.
 
-As always, don’t forget to source ROS 2 in :doc:`every new terminal you open <../Configuring-ROS2-Environment>`.
+Como siempre, no olvides hacer un source ROS 2 en :doc:`cada terminal nueva <../Configuring-ROS2-Environment>`.
 
-Tasks
------
+Tareas
+------
 
-1 Setup
-^^^^^^^
-Start up the two turtlesim nodes, ``/turtlesim`` and ``/teleop_turtle``.
+1 Configuración
+^^^^^^^^^^^^^^^
+Inicia los nodos, ``/turtlesim`` y ``/teleop_turtle``.
 
-Open a new terminal and run:
+Abre una nueva terminal e introduce el siguiente comando:
 
 .. code-block:: console
 
     ros2 run turtlesim turtlesim_node
 
-Open another terminal and run:
+Abre una nueva terminal e introduce el siguiente comando:
 
 .. code-block:: console
 
@@ -59,7 +59,7 @@ Open another terminal and run:
 2 ros2 service list
 ^^^^^^^^^^^^^^^^^^^
 
-Running the ``ros2 service list`` command in a new terminal will return a list of all the services currently active in the system:
+Ejecutar el comando ``ros2 service list`` en un nuevo terminal devolverá una lista de todos los servicios actualmente activos en el sistema:
 
 .. code-block:: console
 
@@ -83,52 +83,53 @@ Running the ``ros2 service list`` command in a new terminal will return a list o
   /turtlesim/set_parameters
   /turtlesim/set_parameters_atomically
 
-You will see that both nodes have the same six services with ``parameters`` in their names.
-Nearly every node in ROS 2 has these infrastructure services that parameters are built off of.
-There will be more about parameters in the next tutorial.
-In this tutorial, the parameter services will be omitted from discussion.
+Puedes observar que ambos nodos tienen los mismos seis servicios con ``parameters`` en sus nombres.
+Casi todos los nodos en ROS 2 tienen estos servicios de infraestructura de los que se construyen los parámetros.
+Aprenderás más sobre los parámetros en el próximo tutorial.
+En este tutorial, los servicios de parámetros se omitirán de la discusión.
 
-For now, let’s focus on the turtlesim-specific services, ``/clear``, ``/kill``, ``/reset``, ``/spawn``, ``/turtle1/set_pen``, ``/turtle1/teleport_absolute``, and ``/turtle1/teleport_relative``.
-You may recall interacting with some of these services using rqt in the :doc:`Use turtlesim and rqt <../Introducing-Turtlesim/Introducing-Turtlesim>` tutorial.
+Por ahora nos centraremos en los servicios específicos de turtlesim, ``/clear``, ``/kill``, ``/reset``, ``/spawn``, ``/turtle1/set_pen``, ``/turtle1/teleport_absolute``, y ``/turtle1/teleport_relative``.
+Si no recuerdas como interactuar con alguno de estos servicios utilizando rqt puedes dirigirte al tutorial :doc:`Utilizar tutrlesim y rqt <../Introducing-Turtlesim/Introducing-Turtlesim>`.
+
 
 
 3 ros2 service type
 ^^^^^^^^^^^^^^^^^^^
 
-Services have types that describe how the request and response data of a service is structured.
-Service types are defined similarly to topic types, except service types have two parts: one message for the request and another for the response.
+Los servicios tienen tipos que describen cómo se estructuran los datos de la solicitud y respuesta de un servicio.
+Estos tipos se definen de manera similar a los tipos de topics, excepto que los tipos de servicio tienen dos partes: un mensaje para la solicitud y otro para la respuesta.
 
-To find out the type of a service, use the command:
+Para averiguar el tipo de servicio, use el comando:
 
 .. code-block:: console
 
   ros2 service type <service_name>
 
-Let’s take a look at turtlesim’s ``/clear`` service.
-In a new terminal, enter the command:
+Prueba echar un vistazo al servicio ``/clear``.
+Abre una nueva terminal e introduce el siguiente comando:
 
 .. code-block:: console
 
   ros2 service type /clear
 
-Which should return:
+El terminal devolverá:
 
 .. code-block:: console
 
   std_srvs/srv/Empty
 
-The ``Empty`` type means the service call sends no data when making a request and receives no data when receiving a response.
+El tipo ``Empty`` significa que la llamada al servicio no envía datos al hacer una solicitud y no recibe datos al recibir una respuesta.
 
 3.1 ros2 service list -t
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-To see the types of all the active services at the same time, you can append the ``--show-types`` option, abbreviated as ``-t``, to the ``list`` command:
+Para ver los tipos de todos los servicios activos al mismo tiempo, puedes agregar la opción ``--show-types``, abreviada como ``-t``, al comando ``list``:
 
 .. code-block:: console
 
   ros2 service list -t
 
-Which will return:
+El terminal devolverá:
 
 .. code-block:: console
 
@@ -145,19 +146,19 @@ Which will return:
 4 ros2 service find
 ^^^^^^^^^^^^^^^^^^^
 
-If you want to find all the services of a specific type, you can use the command:
+Para ver todos los servicios de un tipo específico, puedes usar el comando:
 
 .. code-block:: console
 
   ros2 service find <type_name>
 
-For example, you can find all the ``Empty`` typed services like this:
+Por ejemplo, puedes encontrar todos los tipos de sevicio ``Empty`` mediante el comando:
 
 .. code-block:: console
 
   ros2 service find std_srvs/srv/Empty
 
-Which will return:
+El terminal devolverá:
 
 .. code-block:: console
 
@@ -167,83 +168,84 @@ Which will return:
 5 ros2 interface show
 ^^^^^^^^^^^^^^^^^^^^^
 
-You can call services from the command line, but first you need to know the structure of the input arguments.
+Los sevicios pueden ser llamados desde la línea de comandos, pero primero debes conocer la estructura de los argumentos de entrada.
 
 .. code-block:: console
 
   ros2 interface show <type_name>
 
-To run this command on the ``/clear`` service’s type, ``Empty``:
+Para conocer la estructura del servicio de tipo ``Empty`` escribe en la terminal:
 
 .. code-block:: console
 
   ros2 interface show std_srvs/srv/Empty
 
-Which will return:
+El terminal devolverá:
 
 .. code-block:: console
 
   ---
 
-The ``---`` separates the request structure (above) from the response structure (below).
-But, as you learned earlier, the ``Empty`` type doesn’t send or receive any data.
-So, naturally, its structure is blank.
+El ``---`` separa la estructura de solicitud (arriba), de la estructura de respuesta (debajo).
+Pero, como aprendiste recientemente, el tipo ``Empty`` no envía ni recibe datos.
+Entonces, naturalmente, su estructura está en blanco.
 
-Let’s introspect a service with a type that sends and receives data, like ``/spawn``.
-From the results of ``ros2 service list -t``, we know ``/spawn``’s type is ``turtlesim/srv/Spawn``.
+Ahora prueba analizar un servicio que envíe y reciba datos, como ``/spawn``.
+De los resultados de la lista de servicios ``ros2 service list -t``, sabemos que el sevicio ``/spawn`` tiene un tipo: ``turtlesim/srv/Spawn``.
 
-To see the arguments in a ``/spawn`` call-and-request, run the command:
+Para ver la estructura del servicio ``/spawn``, ejecuta el comando:
 
 .. code-block:: console
 
   ros2 interface show turtlesim/srv/Spawn
 
-Which will return:
+El terminal devolverá:
 
 .. code-block:: console
 
   float32 x
   float32 y
   float32 theta
-  string name # Optional.  A unique name will be created and returned if this is empty
+  string name # Opcional. Se creará y devolverá un nombre único si está vacío
   ---
   string name
 
-The information above the ``---`` line tells us the arguments needed to call ``/spawn``.
-``x``, ``y`` and ``theta`` determine the location of the spawned turtle, and ``name`` is clearly optional.
+La información por encima de la línea ``---`` indica los argumentos necesarios para llamar ``/spawn``.
+``x``, ``y`` y ``theta`` determinan la ubicación inicial de la tortuga, y ``name`` es opcional.
 
-The information below the line isn’t something you need to know in this case, but it can help you understand the data type of the response you get from the call.
+La información debajo de la línea no es algo que necesitas saber en este caso, pero puede ayudarte a comprender el tipo de datos de la respuesta que obtiene de la llamada.
 
 6 ros2 service call
 ^^^^^^^^^^^^^^^^^^^
 
 Now that you know what a service type is, how to find a service’s type, and how to find the structure of that type’s arguments, you can call a service using:
+Ahora que sabes qué es el tipo de un servicio, cómo encontrar el tipo de un servicio y cómo encontrar la estructura de ese tipo de argumentos, puedes llamar a un servicio usando:
 
 .. code-block:: console
 
   ros2 service call <service_name> <service_type> <arguments>
 
-The ``<arguments>`` part is optional.
-For example, you know that ``Empty`` typed services don’t have any arguments:
+La parte ``<arguments>`` es opcional.
+Por ejemplo, de la sección anterior sabes que los servicios ``Empty`` no tienen ningún argumento:
 
 .. code-block:: console
 
   ros2 service call /clear std_srvs/srv/Empty
 
-This command will clear the turtlesim window of any lines your turtle has drawn.
+Este comando limpiará la ventana turtlesim de cualquier línea que la tortuga haya dibujado.
 
 .. image:: images/clear.png
 
-Now let’s spawn a new turtle by calling ``/spawn`` and inputting arguments.
-Input ``<arguments>`` in a service call from the command-line need to be in YAML syntax.
+Ahora crea una nueva tortuga llamando al servicio ``/spawn`` e ingresando argumentos.
+La parte ``<arguments>`` en una llamada de servicio desde la línea de comandos debe estar en la formato YAML.
 
-Enter the command:
+Ingresa el comando:
 
 .. code-block:: console
 
   ros2 service call /spawn turtlesim/srv/Spawn "{x: 2, y: 2, theta: 0.2, name: ''}"
 
-You will get this method-style view of what’s happening, and then the service response:
+Obtendrás un mensaje en la terminal con la información de la solicitud, y luego la respuesta del servicio:
 
 .. code-block:: console
 
@@ -252,26 +254,26 @@ You will get this method-style view of what’s happening, and then the service 
   response:
   turtlesim.srv.Spawn_Response(name='turtle2')
 
-Your turtlesim window will update with the newly spawned turtle right away:
+Tu ventana turtlesim se actualizará de inmediato con la tortuga recién generada:
 
 .. image:: images/spawn.png
 
 Summary
 -------
 
-Nodes can communicate using services in ROS 2.
-Unlike a topic - a one way communication pattern where a node publishes information that can be consumed by one or more subscribers - a service is a request/response pattern where a client makes a request to a node providing the service and the service processes the request and generates a response.
+Los nodos pueden comunicarse usando servicios en ROS 2.
+A diferencia de un topic, un patrón de comunicación unidireccional donde un nodo publica información que puede consumir uno o más suscriptores, un servicio es un patrón de solicitud/respuesta en el que un cliente realiza una solicitud a un nodo que proporciona el servicio, el servicio procesa la solicitud de la solicitud y genera una respuesta.
 
-You generally don’t want to use a service for continuous calls; topics or even actions would be better suited.
+Generalmente no deseas utilizar un servicio para llamadas continuas. Los temas o incluso las acciones serían más adecuadas.
 
-In this tutorial you used command line tools to identify, elaborate on, and call services.
+En este tutorial, utilizaste las herramientas de línea de comandos para identificar, elaborar y llamar a los servicios.
 
 Next steps
 ----------
 
-In the next tutorial, :doc:`../Understanding-ROS2-Parameters/Understanding-ROS2-Parameters`, you will learn about configuring node settings.
+En el siguiente tutorial, :doc:`../Understanding-ROS2-Parameters/Understanding-ROS2-Parameters`, aprenderás acerca de los parámetros, un valor de configuración de un nodo.
 
 Related content
 ---------------
 
-Check out `this tutorial <https://discourse.ubuntu.com/t/call-services-in-ros-2/15261>`_; it's an excellent realistic application of ROS services using a Robotis robot arm.
+Puedes mirar `este tutorial <https://discourse.ubuntu.com/t/call-services-in-ros-2/15261>`_; es una excelente aplicación realista de los servicios ROS que utilizan un brazo robot Robotis.
