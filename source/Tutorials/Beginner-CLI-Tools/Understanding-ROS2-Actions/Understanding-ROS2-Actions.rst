@@ -4,123 +4,123 @@
 
 .. _ROS2Actions:
 
-Understanding actions
-=====================
+Comprender las acciones
+=======================
 
-**Goal:** Introspect actions in ROS 2.
+**Objetivo:** Examinar las acciones en ROS 2.
 
-**Tutorial level:** Beginner
+**Nivel del Tutorial:** Principiante
 
-**Time:** 15 minutes
+**Tiempo:** 15 minutos
 
 .. contents:: Contents
    :depth: 2
    :local:
 
-Background
-----------
+Historial
+---------
 
-Actions are one of the communication types in ROS 2 and are intended for long running tasks.
-They consist of three parts: a goal, feedback, and a result.
+Las acciones son uno de los tipos de comunicación en ROS 2 y están destinadas a tareas de larga duración.
+Consisten en tres partes: un objetivo, retroalimentación y un resultado.
 
-Actions are built on topics and services.
-Their functionality is similar to services, except actions can be canceled.
-They also provide steady feedback, as opposed to services which return a single response.
+Las acciones se basan en topics y servicios.
+Su funcionalidad es similar a los servicios, excepto que las acciones pueden cancelarse.
+También proporcionan comentarios constantes, a diferencia de los servicios que devuelven una sola respuesta.
 
-Actions use a client-server model, similar to the publisher-subscriber model (described in the :doc:`topics tutorial <../Understanding-ROS2-Topics/Understanding-ROS2-Topics>`).
-An “action client” node sends a goal to an “action server” node that acknowledges the goal and returns a stream of feedback and a result.
+Las Acciones utilizan un modelo cliente-servidor, similar al modelo publicador-suscriptor (descrito en :doc:`topics tutorial <../Understanding-ROS2-Topics/Understanding-ROS2-Topics>`).
+Un nodo de "Cliente de Acción" envía un objetivo a un nodo "Servidor de acción" que reconoce el objetivo y devuelve comentarios de realimentación y un resultado.
 
 .. image:: images/Action-SingleActionClient.gif
 
-Prerequisites
--------------
+Requisitos previos
+------------------
 
-This tutorial builds off concepts, like :doc:`nodes <../Understanding-ROS2-Nodes/Understanding-ROS2-Nodes>` and :doc:`topics <../Understanding-ROS2-Topics/Understanding-ROS2-Topics>`, covered in previous tutorials.
+Este tutorial desarrolla conceptos como :doc:`nodos <../Understanding-ROS2-Nodes/Understanding-ROS2-Nodes>` y  :doc:`topics <../Understanding-ROS2-Topics/Understanding-ROS2-Topics>`, tratados en tutoriales previos.
 
-This tutorial uses the :doc:`turtlesim package <../Introducing-Turtlesim/Introducing-Turtlesim>`.
+Este tutorial utiliza :doc:`el paquete turtlesim <../Introducing-Turtlesim/Introducing-Turtlesim>`.
 
-As always, don’t forget to source ROS 2 in :doc:`every new terminal you open <../Configuring-ROS2-Environment>`.
+Como siempre, no olvides hacer un source ROS 2 en :doc:`cada terminal nueva<../Configuring-ROS2-Environment>`.
 
-Tasks
------
+Tareas
+------
 
-1 Setup
-^^^^^^^
+1 Configuración
+^^^^^^^^^^^^^^^
 
-Start up the two turtlesim nodes, ``/turtlesim`` and ``/teleop_turtle``.
+Inicia dos nodos de turtlesim, ``/turtlesim`` y ``/teleop_turtle``.
 
-Open a new terminal and run:
+Abre una terminal e inicia el nodo con el comando:
 
 .. code-block:: console
 
     ros2 run turtlesim turtlesim_node
 
-Open another terminal and run:
+Abre otra terminal nueva e inicia el segundo nodo con el comando:
 
 .. code-block:: console
 
     ros2 run turtlesim turtle_teleop_key
 
 
-2 Use actions
-^^^^^^^^^^^^^
+2 Utilizar acciones
+^^^^^^^^^^^^^^^^^^^
 
-When you launch the ``/teleop_turtle`` node, you will see the following message in your terminal:
+Cuando ejecutes el nodo ``/teleop_turtle``, ver+as el siguiente mensaje en tu terminal:
 
 .. code-block:: console
 
     Use arrow keys to move the turtle.
     Use G|B|V|C|D|E|R|T keys to rotate to absolute orientations. 'F' to cancel a rotation.
 
-Let’s focus on the second line, which corresponds to an action.
-(The first instruction corresponds to the “cmd_vel” topic, discussed previously in the :doc:`topics tutorial <../Understanding-ROS2-Topics/Understanding-ROS2-Topics>`.)
+Centrémonos en la segunda línea, que corresponde a una acción.
+(La primera instrucción corresponde al tema "cmd_vel", discutido anteriormente en :doc:`topics tutorial <../Understanding-ROS2-Topics/Understanding-ROS2-Topics>`.)
 
-Notice that the letter keys ``G|B|V|C|D|E|R|T`` form a “box” around the ``F`` key on a US QWERTY keyboard (if you are not using a QWERTY keyboard, see `this link <https://upload.wikimedia.org/wikipedia/commons/d/da/KB_United_States.svg>`__ to follow along).
-Each key’s position around ``F`` corresponds to that orientation in turtlesim.
-For example, the ``E`` will rotate the turtle’s orientation to the upper left corner.
+Observe que las teclas de la letra ``G|B|V|C|D|E|R|T`` forman una "caja" alrededor de la tecla ``F`` en un teclado US Qwerty (Si no estás utilizando un teclado Qwerty, puedes ver `this link <https://upload.wikimedia.org/wikipedia/commons/d/da/KB_United_States.svg>`__).
+La posición de cada llave alrededor de ``F`` corresponde a esa orientación en Turtlesim.
+Por ejemplo, el ``E`` girará la orientación de la tortuga a la esquina superior izquierda.
 
-Pay attention to the terminal where the ``/turtlesim`` node is running.
-Each time you press one of these keys, you are sending a goal to an action server that is part of the ``/turtlesim`` node.
-The goal is to rotate the turtle to face a particular direction.
-A message relaying the result of the goal should display once the turtle completes its rotation:
+Presta atención al terminal donde se está ejecutando el nodo ``/turtlesim``.
+Cada vez que presiones una de estas teclas, estás enviando un objetivo a un servidor de acción que forma parte del nodo ``/turtlesim``.
+El objetivo es rotar la tortuga hacia una dirección particular.
+Una vez que la tortuga complete su rotación, aparecerá un mensaje con el resultado del objetivo:
 
 .. code-block:: console
 
     [INFO] [turtlesim]: Rotation goal completed successfully
 
-The ``F`` key will cancel a goal mid-execution.
+La tecla ``F`` cancela la acción en medio de la ejecución.
 
-Try pressing the ``C`` key, and then pressing the ``F`` key before the turtle can complete its rotation.
-In the terminal where the ``/turtlesim`` node is running, you will see the message:
+Intenta presionar la tecla ``C`` y luego presiona la tecla ``F`` antes de que la tortuga pueda completar su rotación.
+En el terminal donde se está ejecutando el nodo ``/turtlesim``, verás el mensaje:
 
 .. code-block:: console
 
   [INFO] [turtlesim]: Rotation goal canceled
 
-Not only can the client-side (your input in the teleop) stop a goal, but the server-side (the ``/turtlesim`` node) can as well.
-When the server-side chooses to stop processing a goal, it is said to “abort” the goal.
+Tanto el lado del cliente (la entrada en telop), como el lado del servidor (el nodo ``/turtlesim``) pueden detener un objetivo.
+Cuando el lado del servidor elige dejar de procesar un objetivo, se dice que "aborta" el objetivo.
 
-Try hitting the ``D`` key, then the ``G`` key before the first rotation can complete.
-In the terminal where the ``/turtlesim`` node is running, you will see the message:
+Intenta presionar la tecla ``D``, luego la tecla ``G`` antes de que pueda completarse la primera rotación.
+En el terminal donde se está ejecutando el nodo ``/turtlesim``, podrás ver el mensaje:
 
 .. code-block:: console
 
   [WARN] [turtlesim]: Rotation goal received before a previous goal finished. Aborting previous goal
 
-This action server chose to abort the first goal because it got a new one.
-It could have chosen something else, like reject the new goal or execute the second goal after the first one finished.
-Don't assume every action server will choose to abort the current goal when it gets a new one.
+Como se puede ver en el mensaje anterior, el servidor de acción eligió abortar el primer objetivo porque obtuvo uno nuevo.
+Podría haber elegido algo más, como rechazar el nuevo objetivo o ejecutar el segundo gol después de que el primero terminó.
+No asumas que cada servidor de acción elegirá abortar el objetivo actual cuando obtenga uno nuevo.
 
 3 ros2 node info
 ^^^^^^^^^^^^^^^^
 
-To see the ``/turtlesim`` node’s actions, open a new terminal and run the command:
+Para ver las acciones disponibles en el nodo ``/turtlesim``, abre un nueva terminal y ejecuta el comando:
 
 .. code-block:: console
 
     ros2 node info /turtlesim
 
-Which will return a list of ``/turtlesim``’s subscribers, publishers, services, action servers and action clients:
+Que devolverá una lista de suscriptores, publicadores, servicios, servidores de acción y clientes de acción del nodo ``/turtlesim``:
 
 .. code-block:: console
 
@@ -153,16 +153,16 @@ Which will return a list of ``/turtlesim``’s subscribers, publishers, services
       /turtle1/rotate_absolute: turtlesim/action/RotateAbsolute
     Action Clients:
 
-Notice that the ``/turtle1/rotate_absolute`` action for ``/turtlesim`` is under ``Action Servers``.
-This means ``/turtlesim`` responds to and provides feedback for the ``/turtle1/rotate_absolute`` action.
+Puedes notar que la acción ``/turtle1/rotate_absolute`` para el nodo ``/turtlesim`` está en la categoría ``Action Servers``.
+Esto significa que el nodo ``/turtlesim`` responde y provee retroalimentación  para la acción ``/turtle1/rotate_absolute``.
 
-The ``/teleop_turtle`` node has the name ``/turtle1/rotate_absolute`` under ``Action Clients`` meaning that it sends goals for that action name.
+Si ejecutas el comando acontinuación, podás observar que el nodo ``/teleop_turtle`` tiene el nombre ``/turtle1/rotate_absolute`` en la categoría ``Action Clients``, lo que significa que envía objetivos para esa acción.
 
 .. code-block:: console
 
     ros2 node info /teleop_turtle
 
-Which will return:
+La salida debería verse así:
 
 .. code-block:: console
 
@@ -190,51 +190,51 @@ Which will return:
 4 ros2 action list
 ^^^^^^^^^^^^^^^^^^
 
-To identify all the actions in the ROS graph, run the command:
+Para identificar todas las acciones en el grafo de ROS, ejecuta el comando:
 
 .. code-block:: console
 
     ros2 action list
 
-Which will return:
+La salida debería verse así:
 
 .. code-block:: console
 
     /turtle1/rotate_absolute
 
-This is the only action in the ROS graph right now.
-It controls the turtle’s rotation, as you saw earlier.
-You also already know that there is one action client (part of ``/teleop_turtle``) and one action server (part of ``/turtlesim``) for this action from using the ``ros2 node info <node_name>`` command.
+Esta es la única acción en el grafo de ROS en este momento.
+Controla la rotación de la tortuga, como viste anteriormente.
+También sabes que hay un cliente de acción (proveniente del nodo ``/teleop_turtle``) y un servidor  de acción (proveniente del nodo ``/turtlesim``) para esta acción, lo cual puedes verificar con el comando ``ros2 node info <node_name>``.
 
 4.1 ros2 action list -t
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Actions have types, similar to topics and services.
-To find ``/turtle1/rotate_absolute``'s type, run the command:
+Las acciones tienen tipos, similares a los topics y servicios.
+Para obtener el tipo de ``/turtle1/rotate_absolute``, ejecuta el siguiente comando:
 
 .. code-block:: console
 
     ros2 action list -t
 
-Which will return:
+La salida debería verse así:
 
 .. code-block:: console
 
     /turtle1/rotate_absolute [turtlesim/action/RotateAbsolute]
 
-In brackets to the right of each action name (in this case only ``/turtle1/rotate_absolute``) is the action type, ``turtlesim/action/RotateAbsolute``.
-You will need this when you want to execute an action from the command line or from code.
+En los paréntesis a la derecha de cada nombre de acción (en este caso solo ``/turtle1/rotate_absolute``) se encuentra el tipo de la acción, ``turtlesim/action/RotateAbsolute``.
+Necesitarás esto cuando desees ejecutar una acción desde la línea de comando o desde el código.
 
 5 ros2 action info
 ^^^^^^^^^^^^^^^^^^
 
-You can further introspect the ``/turtle1/rotate_absolute`` action with the command:
+Puedes inspeccionar aún más la acción ``/Turtle1/Rotate_absolute`` con el comando:
 
 .. code-block:: console
 
     ros2 action info /turtle1/rotate_absolute
 
-Which will return
+La salida debería verse así:
 
 .. code-block:: console
 
@@ -244,23 +244,23 @@ Which will return
   Action servers: 1
       /turtlesim
 
-This tells us what we learned earlier from running ``ros2 node info`` on each node:
-The ``/teleop_turtle`` node has an action client and the ``/turtlesim`` node has an action server for the ``/turtle1/rotate_absolute`` action.
+Esto indica lo que aprendiste de ejecutar ``info de nodo ROS2`` en cada nodo:
+El nodo ``/teleop_turtle`` tiene un cliente de acción y el nodo ``/turtlesim`` tiene un servidor de acción para la acción ``/turtle1/rotate_absolute``.
 
 
 6 ros2 interface show
 ^^^^^^^^^^^^^^^^^^^^^
 
-One more piece of information you will need before sending or executing an action goal yourself is the structure of the action type.
+Una información más que necesitarás antes de enviar o ejecutar un objetivo de acción es la estructura del tipo de acción.
 
-Recall that you identified ``/turtle1/rotate_absolute``’s type when running the command ``ros2 action list -t``.
-Enter the following command with the action type in your terminal:
+Recuerda que identificaste el tipo de ``/turtle1/totate_absolute`` al ejecutar el comando ``ros2 action list -t``.
+Ingresa el siguiente comando con el tipo de acción en tu terminal:
 
 .. code-block:: console
 
   ros2 interface show turtlesim/action/RotateAbsolute
 
-Which will return:
+La salida debería verse así:
 
 .. code-block:: console
 
@@ -273,28 +273,29 @@ Which will return:
   # The remaining rotation in radians
   float32 remaining
 
-The first section of this message, above the ``---``, is the structure (data type and name) of the goal request.
-The next section is the structure of the result.
-The last section is the structure of the feedback.
+La primera sección de este mensaje, por encima del ``--- ``, es la estructura (tipo de datos y nombre) de la solicitud del objetivo.
+La siguiente sección es la estructura del resultado.
+La última sección es la estructura de la retroalimentación.
+
 
 7 ros2 action send_goal
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Now let’s send an action goal from the command line with the following syntax:
+Ahora intenta enviar un objetivo de acción desde la línea de comando con la siguiente sintaxis:
 
 .. code-block:: console
 
     ros2 action send_goal <action_name> <action_type> <values>
 
-``<values>`` need to be in YAML format.
+``<values>`` tiene que estar en formato YAML.
 
-Keep an eye on the turtlesim window, and enter the following command into your terminal:
+Mantente atento a la ventana de turtlesim e ingresa el siguiente comando en tu terminal:
 
 .. code-block:: console
 
     ros2 action send_goal /turtle1/rotate_absolute turtlesim/action/RotateAbsolute "{theta: 1.57}"
 
-You should see the turtle rotating, as well as the following message in your terminal:
+Deberías ver la tortuga girando, así como el siguiente mensaje en tu terminal:
 
 .. code-block:: console
 
@@ -309,16 +310,17 @@ You should see the turtle rotating, as well as the following message in your ter
 
   Goal finished with status: SUCCEEDED
 
-All goals have a unique ID, shown in the return message.
-You can also see the result, a field with the name ``delta``, which is the displacement to the starting position.
 
-To see the feedback of this goal, add ``--feedback`` to the ``ros2 action send_goal`` command:
+Todos los objetivos tienen una identificación única, que se muestra en el mensaje de retorno.
+También puedes ver el resultado, un campo con el nombre ``delta``, que es el desplazamiento desde la posición inicial.
+
+Para ver el mensaje de retroalimentación de este objetivo, agregua ``--feedback`` al comando ``ros2 action send_goal``:
 
 .. code-block:: console
 
     ros2 action send_goal /turtle1/rotate_absolute turtlesim/action/RotateAbsolute "{theta: -1.57}" --feedback
 
-Your terminal will return the message:
+En tu terminal deberías ver un mensaje como el siguiente:
 
 .. code-block:: console
 
@@ -340,27 +342,27 @@ Your terminal will return the message:
 
   Goal finished with status: SUCCEEDED
 
-You will continue to receive feedback, the remaining radians, until the goal is complete.
+Continuarás recibiendo mensajes de retroalimentación, los radianos restantes, hasta que se complete el objetivo.
 
-Summary
+Resumen
 -------
 
-Actions are like services that allow you to execute long running tasks, provide regular feedback, and are cancelable.
+Las acciones son como servicios que te permiten ejecutar tareas de larga duración, proporcionar mensajes de retroalimentación y son cancelables.
 
-A robot system would likely use actions for navigation.
-An action goal could tell a robot to travel to a position.
-While the robot navigates to the position, it can send updates along the way (i.e. feedback), and then a final result message once it's reached its destination.
+Un sistema de robots probablemente usaría acciones para la navegación.
+El objetivo de una acción podría decirle a un robot que viaje a una posición.
+Mientras el robot navega a la posición, este puede enviar actualizaciones en el camino (es decir, retroalimentación), y luego un mensaje de resultado final una vez que llegue a su destino.
 
-Turtlesim has an action server that action clients can send goals to for rotating turtles.
-In this tutorial, you introspected that action, ``/turtle1/rotate_absolute``, to get a better idea of what actions are and how they work.
+El nodo turtlesim tiene un servidor de acción al que los clientes de acción pueden enviar objetivos para girar las tortugas.
+En este tutorial, introspectaste esa acción, ``/turtle1/rotate_absolute``, para tener una mejor idea de qué son las acciones y cómo funcionan.
 
-Next steps
-----------
+Pasos siguientes
+----------------
 
-Now you've covered all of the core ROS 2 concepts.
-The last few tutorials in the "Users" set will introduce you to some tools and techniques that will make using ROS 2 easier, starting with :doc:`../Using-Rqt-Console/Using-Rqt-Console`.
+Con esto cubriste todos los conceptos fundamentales de ROS 2.
+Los últimos tutoriales en el conjunto "Usuarios" te presentarán algunas herramientas y técnicas que facilitarán el uso de ROS 2, comenzando con :doc:`../Using-Rqt-Console/Using-Rqt-Console`.
 
-Related content
----------------
+Contenido Relacionado
+---------------------
 
-You can read more about the design decisions behind actions in ROS 2 `here <https://design.ros2.org/articles/actions.html>`__.
+Puedes leer más sobre las decisiones de diseño detrás de las acciones en ROS 2 `aquí <https://design.ros2.org/articles/actions.html>`__.
